@@ -1,6 +1,6 @@
 import React from 'react';
-import Sidebar from '@/components/Sidebar';
 import Image from 'next/image';
+import Sidebar from '@/components/Sidebar';
 import MobileNav from '@/components/MobileNav';
 
 const HomeLayout = ({

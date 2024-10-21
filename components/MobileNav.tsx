@@ -5,11 +5,12 @@ import {
    SheetContent,
    SheetTrigger,
 } from '@/components/ui/sheet';
-import { sidebarLinks } from '@/constants';
-import { cn } from '@/lib/utils';
-import Image from 'next/image';
 import Link from 'next/link';
+import Image from 'next/image';
+import { cn } from '@/lib/utils';
+import { sidebarLinks } from '@/constants';
 import { usePathname } from 'next/navigation';
+
 const MobileNav = ({ user }: MobileNavProps) => {
    const pathname = usePathname();
    return (
