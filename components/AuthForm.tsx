@@ -1,18 +1,17 @@
 'use client';
 
-import Image from 'next/image';
-import Link from 'next/link';
-import React, { useState } from 'react';
-
 import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { Button } from '@/components/ui/button';
-import { Form } from '@/components/ui/form';
-import CustomInput from './CustomInput';
+import Link from 'next/link';
+import Image from 'next/image';
 import { Loader2 } from 'lucide-react';
+import React, { useState } from 'react';
+import CustomInput from './CustomInput';
+import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
+import { Form } from '@/components/ui/form';
 import { authFormSchema } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { signIn, signUp } from '@/lib/actions/user.actions';
 
 const AuthForm = ({ type }: { type: string }) => {
