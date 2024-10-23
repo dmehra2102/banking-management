@@ -1,12 +1,16 @@
 import Image from 'next/image';
 import { Button } from './ui/button';
-import React, { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
    PlaidLinkOnSuccess,
    PlaidLinkOptions,
    usePlaidLink,
 } from 'react-plaid-link';
+import {
+   createLinkToken,
+   exchangePublicToken,
+} from '@/lib/actions/user.actions';
 
 const PlaidLink = ({ user, variant }: PlaidLinkProps) => {
    const router = useRouter();
@@ -32,6 +36,7 @@ const PlaidLink = ({ user, variant }: PlaidLinkProps) => {
 
          router.push('/');
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [user]
    );
 

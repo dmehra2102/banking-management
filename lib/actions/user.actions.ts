@@ -2,7 +2,7 @@
 
 import { ID } from 'node-appwrite';
 import { cookies } from 'next/headers';
-import { encryptId, parseStringify } from '../utils';
+import { encryptId, extractCustomerIdFromUrl, parseStringify } from '../utils';
 import { createAdminClient, createSessionClient } from '../appwrite';
 import {
    CountryCode,
@@ -12,6 +12,7 @@ import {
 } from 'plaid';
 import { plaidClient } from '../plaid';
 import { revalidatePath } from 'next/cache';
+import { addFundingSource, createDwollaCustomer } from './dwolla.action';
 
 const {
    APPWRITE_DATABASE_ID: DATABASE_ID,
@@ -37,10 +38,11 @@ export const signIn = async ({ email, password }: signInProps) => {
    }
 };
 
-export const signUp = async (userData: SignUpParams) => {
+export const signUp = async ({ password, ...userData }: SignUpParams) => {
    try {
-      const { email, password, firstName, lastName } = userData;
-      const { account } = await createAdminClient();
+      const { email, firstName, lastName } = userData;
+
+      const { account, database } = await createAdminClient();
 
       const newUserAccount = await account.create(
          ID.unique(),
@@ -51,6 +53,28 @@ export const signUp = async (userData: SignUpParams) => {
 
       if (!newUserAccount) throw new Error('Error creating user');
 
+      console.log('userData', userData);
+      const dwollaCustomerUrl = await createDwollaCustomer({
+         ...userData,
+         type: 'personal',
+      });
+
+      if (!dwollaCustomerUrl) throw new Error('Error creating Dwolla customer');
+
+      const dwollaCustomerId = extractCustomerIdFromUrl(dwollaCustomerUrl);
+
+      const newUser = await database.createDocument(
+         DATABASE_ID!,
+         USER_COLLECTION_ID!,
+         ID.unique(),
+         {
+            ...userData,
+            userId: newUserAccount.$id,
+            dwollaCustomerId,
+            dwollaCustomerUrl,
+         }
+      );
+
       const session = await account.createEmailPasswordSession(email, password);
 
       cookies().set('bankify-appwrite-session', session.secret, {
@@ -60,7 +84,7 @@ export const signUp = async (userData: SignUpParams) => {
          secure: true,
       });
 
-      return parseStringify(newUserAccount);
+      return parseStringify(newUser);
    } catch (error) {
       console.log(error);
    }
@@ -96,7 +120,7 @@ export const createLinkToken = async (user: User) => {
          user: {
             client_user_id: user.$id,
          },
-         client_name: user.name,
+         client_name: `${user.firstName} ${user.lastName}`,
          products: ['auth'] as Products[],
          language: 'en',
          country_codes: ['US'] as CountryCode[],
